@@ -64,7 +64,33 @@ function Cannonball(tower){
     this.move = function(){
 		this.x += this.direction.x*this.speed/FPS;
 		this.y += this.direction.y*this.speed/FPS;
+		for(var i=0; i<enemies.length; i++){
+			if( isCollided(
+				enemies[i].x, 
+				enemies[i].y, 
+				this.x, this.y, 
+				32,32
+			)){
+				this.hitted = true;
+				enemies[i].hp -= this.damage;
+				break;
+			}
+		}
 	} 
+
+	this.touchEnemy = function(){
+		for(var i=0; i<enemies.length; i++){
+			if( isCollided(
+				enemies[i].x, 
+				enemies[i].y, 
+				this.x, this.y, 
+				this.speed/FPS, this.speed/FPS
+			)){
+				this.hitted = true;
+				enemies[i].hp -= this.damage;
+			}
+		}
+	};
 }
 // 初始化：
 var crosshairImg = document.createElement("img");
@@ -200,13 +226,6 @@ function draw(){
 	ctx.fillStyle = "white";
 	ctx.fillText( "HP:" + HP, 0 , 20 );
 
-	for(var i =0;i<cannonballs.length;i++){
-		ctx.drawImage( 
-			cannonballImage,cannonballs[i].x,cannonballs[i].y 
-		);
-		cannonballs[i].move();
-	}
-
 
 	for(var i = 0; i<enemies.length ; i++){
 		if(enemies[i].hp <= 0){
@@ -227,6 +246,17 @@ function draw(){
 		}
 	}
 
+	for(var i = cannonballs.length-1;i>=0;i--){
+		cannonballs[i].move();
+		if(cannonballs[i].hitted == true){
+			cannonballs.splice(i,1);
+		}else{
+			ctx.drawImage( 
+				cannonballImage,cannonballs[i].x,cannonballs[i].y 
+			);
+		}
+		
+	}
 
 	if(clock % 80 == 0){
 		var newEnemy = new Enemy();
