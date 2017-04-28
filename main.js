@@ -200,6 +200,7 @@ function Enemy(){
 	};
 }
 
+var point = 10;
 var clock = 0 ;
 var enemies = [];
 enemies.push( new Enemy() );
@@ -225,11 +226,12 @@ function draw(){
 	ctx.font = "24px Arial";
 	ctx.fillStyle = "white";
 	ctx.fillText( "HP:" + HP, 0 , 20 );
-
+	ctx.fillText( "分數:" + point, 0 , 50 );
 
 	for(var i = 0; i<enemies.length ; i++){
 		if(enemies[i].hp <= 0){
 			enemies.splice(i,1);
+			point += 10;
 			i-=1;
 		}else{
 			ctx.drawImage(slimeImg, enemies[i].x, enemies[i].y);
@@ -258,6 +260,12 @@ function draw(){
 		
 	}
 
+	if( HP == 0){
+		clearInterval(intervalID);
+		ctx.font = "100px Arial";
+		ctx.fillStyle = "RED";
+		ctx.fillText( "U Lose", 150 , 300 );
+	}
 	if(clock % 80 == 0){
 		var newEnemy = new Enemy();
 		enemies.push(newEnemy);
@@ -287,7 +295,7 @@ $( "#game-canvas" ).click( function( event ) {
 
 // 執行 draw 函式
 setTimeout( draw, 1000);
-setInterval(draw, 1000/FPS );
+var intervalID = setInterval(draw, 1000/FPS );
 
 
 
