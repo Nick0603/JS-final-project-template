@@ -144,7 +144,7 @@ function tower(towerX,towerY){
 }
 
 var towers = [];
-var enemyPath = [
+var enemyPath = [[
 	{x:2 * 32,y:13 * 32},
 	{x:2 * 32,y:9 * 32},
 	{x:4 * 32,y:9 * 32},
@@ -158,20 +158,39 @@ var enemyPath = [
 	{x:7 * 32,y:10 * 32},
 	{x:7 * 32,y:7 * 32},
 	{x:0 * 32,y:7 * 32}
-]
+],[
+	{x:12 * 32,y:1 * 32},
+	{x:12 * 32,y:4 * 32},
+	{x:17 * 32,y:4 * 32},
+	{x:17 * 32,y:7 * 32},
+	{x:10 * 32,y:7 * 32},
+	{x:10 * 32,y:2 * 32},
+	{x:2 * 32,y:2 * 32},
+	{x:2 * 32,y:6 * 32},
+	{x:0 * 32,y:6 * 32},
+]];
 
-function Enemy(){
-	this.x = 0; 
-	this.y = 480-64;
+
+function Enemy(EnemyNumber){
+	this.enemyNumber = EnemyNumber;
+	if(EnemyNumber == 0){
+		this.x = 0; 
+		this.y = (15-2)* 32;
+		this.direction = {x : 1,y : 0};
+	}else{
+		this.x = 20 * 32; 
+		this.y = 1 * 32;
+		this.direction = {x : -1,y : 0};
+	}
 	this.speed = 64;
-	this.direction = {x : 1,y : 0};
+	
 	this.pathDes = 0;
 	this.isLive = true;
 	this.hp = 10;
 	this.move = function(){
 		if( isCollided(
-			enemyPath[this.pathDes].x, 
-			enemyPath[this.pathDes].y, 
+			enemyPath[this.enemyNumber][this.pathDes].x, 
+			enemyPath[this.enemyNumber][this.pathDes].y, 
 			this.x, this.y, 
 			this.speed/FPS, this.speed/FPS
 		)){
@@ -183,18 +202,18 @@ function Enemy(){
 	};
 
 	this.goNextPath = function(){
-		this.x = enemyPath[this.pathDes].x;
-		this.y = enemyPath[this.pathDes].y;
+		this.x = enemyPath[this.enemyNumber][this.pathDes].x;
+		this.y = enemyPath[this.enemyNumber][this.pathDes].y;
 		this.pathDes+=1;
-		if(this.pathDes >= enemyPath.length){
+		if(this.pathDes >= enemyPath[this.enemyNumber].length){
 			this.hp = 0;
-			window.HP -= 10;
+			HP -= 10;
 		}else{
 			this.direction = getUnitVector(
 					this.x,
 					this.y,
-					enemyPath[this.pathDes].x,
-					enemyPath[this.pathDes].y
+					enemyPath[this.enemyNumber][this.pathDes].x,
+					enemyPath[this.enemyNumber][this.pathDes].y
 				);
 		}
 	};
@@ -203,7 +222,6 @@ function Enemy(){
 var point = 10;
 var clock = 0 ;
 var enemies = [];
-enemies.push( new Enemy() );
 
 
 
@@ -223,10 +241,6 @@ function draw(){
 		ctx.drawImage(towerImg, towerPos.x, towerPos.y);
 	}
 
-	ctx.font = "24px Arial";
-	ctx.fillStyle = "white";
-	ctx.fillText( "HP:" + HP, 0 , 20 );
-	ctx.fillText( "分數:" + point, 0 , 50 );
 
 	for(var i = 0; i<enemies.length ; i++){
 		if(enemies[i].hp <= 0){
@@ -260,6 +274,12 @@ function draw(){
 		
 	}
 
+
+	ctx.font = "24px Arial";
+	ctx.fillStyle = "white";
+	ctx.fillText( "HP:" + HP, 0 , 20 );
+	ctx.fillText( "分數:" + point, 0 , 50 );
+
 	if( HP == 0){
 		clearInterval(intervalID);
 		ctx.font = "100px Arial";
@@ -267,8 +287,10 @@ function draw(){
 		ctx.fillText( "U Lose", 150 , 300 );
 	}
 	if(clock % 80 == 0){
-		var newEnemy = new Enemy();
+		var newEnemy = new Enemy(0);
+		var newEnemy2 = new Enemy(1);
 		enemies.push(newEnemy);
+		enemies.push(newEnemy2);
 	}
 	clock++;
 
