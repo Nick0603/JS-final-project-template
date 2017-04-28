@@ -164,23 +164,12 @@ function Enemy(){
 			this.hp = 0;
 			window.HP -= 10;
 		}else{
-			if(this.x != enemyPath[this.pathDes].x){
-				if(enemyPath[this.pathDes].x > this.x){
-					this.direction.x = 1;
-					this.direction.y = 0;
-				}else{
-					this.direction.x = -1;
-					this.direction.y = 0;
-				}
-			}else{
-				if(enemyPath[this.pathDes].y > this.y){
-					this.direction.x = 0;
-					this.direction.y = 1;
-				}else{
-					this.direction.x = 0;
-					this.direction.y = -1;
-				}
-			}
+			this.direction = getUnitVector(
+					this.x,
+					this.y,
+					enemyPath[this.pathDes].x,
+					enemyPath[this.pathDes].y
+				);
 		}
 	};
 }
