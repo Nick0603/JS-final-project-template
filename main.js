@@ -15,9 +15,9 @@ var towerBtn = document.createElement("img");
 towerBtn.src = "images/tower-btn.png";
 
 // 創造 img HTML 元素，並放入變數中
-var tower = document.createElement("img");
+var towerImg = document.createElement("img");
 // 設定這個元素的要顯示的圖片
-tower.src = "images/tower.png";
+towerImg.src = "images/tower.png";
 
 // 找出網頁中的 canvas 元素
 var canvas = document.getElementById("game-canvas");
@@ -25,24 +25,212 @@ var canvas = document.getElementById("game-canvas");
 var ctx = canvas.getContext("2d");
 
 var hero = {
-	x:0,
+	x:100,
 	y:0
 }
 
+var FPS = 60;
+
+
 var cursor = {x:0, y:0}; 
 var isBuilding = false;
-towerPos={x:0,y:0}
+towerPos={x:0,y:0};
 
+var cannonballImage = document.createElement("img");
+cannonballImage.src = "images/cannon-ball.png";
+
+
+function getUnitVector(towerX,towerY,aimedEnemyX,aimedEnemyY){
+	var direction = {};
+	var len = Math.sqrt((aimedEnemyX-towerX)**2 + (aimedEnemyY-towerY)**2);
+	direction.x = (aimedEnemyX - towerX)/len;
+	direction.y = (aimedEnemyY - towerY)/len;
+	return direction;
+}
+
+function Cannonball(tower){
+	this.speed = 320;
+	this.damage = 5 ;
+
+	var aimedEnemy = enemies[tower.aimingEnemyId];
+
+    this.x = tower.x+16;
+    this.y = tower.y;
+    this.direction = getUnitVector(this.x, this.y, aimedEnemy.x, aimedEnemy.y);
+    this.move = function(){
+		this.x += this.direction.x*this.speed/FPS;
+		this.y += this.direction.y*this.speed/FPS;
+	} 
+}
+// 初始化：
+var crosshairImg = document.createElement("img");
+crosshairImg.src = "images/crosshair.png";
+
+var cannonballs = [];
+
+var tower = {
+	x:2 * 32,
+	y:13 * 32,
+	fireRate: 2,
+	readyToShootTime: 1, // 還有幾秒就發射
+	range: 96,
+	aimingEnemyId: null,
+	
+	shoot: function(){
+        var newCannonball = new Cannonball(this);
+        cannonballs.push( newCannonball );
+    },
+
+	searchEnemy: function(){
+		this.readyToShootTime -= 1/FPS;
+		for(var i=0; i<enemies.length; i++){
+			var distance = Math.sqrt( 
+				Math.pow(this.x-enemies[i].x,2) + Math.pow(this.y-enemies[i].y,2) 
+			);
+			if (distance<=this.range) {
+				this.aimingEnemyId = i;
+				if (this.readyToShootTime<=0) {
+                    this.shoot();
+                    this.readyToShootTime = this.fireRate;
+                }
+				return;
+			}
+		}
+		// 如果都沒找到，會進到這行，清除鎖定的目標
+		this.aimingEnemyId = null;
+	}
+};
+
+var enemyPath = [
+	{x:2 * 32,y:13 * 32},
+	{x:2 * 32,y:9 * 32},
+	{x:4 * 32,y:9 * 32},
+	{x:4 * 32,y:12 * 32},
+	{x:10 * 32,y:12 * 32},
+	{x:10 * 32,y:13 * 32},
+	{x:18 * 32,y:13 * 32},
+	{x:18 * 32,y:9 * 32},
+	{x:15 * 32,y:9 * 32},
+	{x:15 * 32,y:10 * 32},
+	{x:7 * 32,y:10 * 32},
+	{x:7 * 32,y:7 * 32},
+	{x:0 * 32,y:7 * 32}
+]
+
+function Enemy(){
+	this.x = 0; 
+	this.y = 480-64;
+	this.speed = 64;
+	this.direction = {x : 1,y : 0};
+	this.pathDes = 0;
+	this.isLive = true;
+	this.hp = 10;
+	this.move = function(){
+		if(this.direction.x != 0){
+			this.x += this.speed / 60 * this.direction.x;
+			if(this.direction.x > 0 && this.x >= enemyPath[this.pathDes].x){
+				this.goNextPath();
+			}
+			if(this.direction.x < 0 && this.x <= enemyPath[this.pathDes].x){
+				this.goNextPath();
+			}
+		}else{
+			this.y += this.speed / 60 * this.direction.y;
+			if(this.direction.y > 0 && this.y >= enemyPath[this.pathDes].y ){
+				this.goNextPath();
+			}
+			if(this.direction.y < 0 && this.y <= enemyPath[this.pathDes].y ){
+				this.goNextPath();
+			}
+		}
+	};
+
+	this.goNextPath = function(){
+		this.x = enemyPath[this.pathDes].x;
+		this.y = enemyPath[this.pathDes].y;
+		this.pathDes+=1;
+		if(this.pathDes >= enemyPath.length){
+			this.hp = 0;
+			window.HP -= 10;
+		}else{
+			if(this.x != enemyPath[this.pathDes].x){
+				if(enemyPath[this.pathDes].x > this.x){
+					this.direction.x = 1;
+					this.direction.y = 0;
+				}else{
+					this.direction.x = -1;
+					this.direction.y = 0;
+				}
+			}else{
+				if(enemyPath[this.pathDes].y > this.y){
+					this.direction.x = 0;
+					this.direction.y = 1;
+				}else{
+					this.direction.x = 0;
+					this.direction.y = -1;
+				}
+			}
+		}
+	};
+}
+
+var clock = 0 ;
+var enemies = [];
+enemies.push( new Enemy() );
+
+
+
+var slimeImg = document.createElement("img");
+slimeImg.src = "images/slime.gif";
+var HP = 100;
 function draw(){
 	// 將背景圖片畫在 canvas 上的 (0,0) 位置
 	ctx.drawImage(bgImg,0,0);
 	ctx.drawImage(towerBtn, 590, 430, 50, 50 );
 	ctx.drawImage(heroImg, hero.x, hero.y);
+
+
 	if(isBuilding == true){
-		towerPos.x = cursor.x - cursor.x%32;
-		towerPos.y = cursor.y - cursor.y%32;
-		ctx.drawImage(tower, towerPos.x, towerPos.y);
+		towerPos.x = cursor.x - cursor.x % 32;
+		towerPos.y = cursor.y - cursor.y % 32;
+		ctx.drawImage(towerImg, towerPos.x, towerPos.y);
 	}
+
+	ctx.font = "24px Arial";
+	ctx.fillStyle = "white";
+	ctx.fillText( "HP:" + HP, 0 , 20 );
+
+	for(var i =0;i<cannonballs.length;i++){
+		ctx.drawImage( 
+			cannonballImage,cannonballs[i].x,cannonballs[i].y 
+		);
+		cannonballs[i].move();
+	}
+
+
+	for(var i = 0; i<enemies.length ; i++){
+		if(enemies[i].hp <= 0){
+			enemies.splice(i,1);
+			i-=1;
+		}else{
+			ctx.drawImage(slimeImg, enemies[i].x, enemies[i].y);
+			enemies[i].move();
+		}
+	}
+
+	tower.searchEnemy();
+	if ( tower.aimingEnemyId!=null ) {
+	    var id = tower.aimingEnemyId;
+	    ctx.drawImage( crosshairImg, enemies[id].x, enemies[id].y );
+	}
+
+
+	if(clock % 80 == 0){
+		var newEnemy = new Enemy();
+		enemies.push(newEnemy);
+	}
+	clock++;
+
 }
 
 $( "#game-canvas" ).mousemove( function( event ) {
@@ -62,7 +250,7 @@ $( "#game-canvas" ).click( function( event ) {
 
 // 執行 draw 函式
 setTimeout( draw, 1000);
-setInterval(draw, 16 );
+setInterval(draw, 1000/FPS );
 
 
 
