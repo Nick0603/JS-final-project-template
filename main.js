@@ -170,7 +170,7 @@ var enemyPath = [[
 	{x:0 * 32,y:6 * 32},
 ]];
 
-
+enemyHP = 10;
 function Enemy(EnemyNumber){
 	this.enemyNumber = EnemyNumber;
 	if(EnemyNumber == 0){
@@ -186,7 +186,7 @@ function Enemy(EnemyNumber){
 	
 	this.pathDes = 0;
 	this.isLive = true;
-	this.hp = 10;
+	this.hp = enemyHP;
 	this.move = function(){
 		if( isCollided(
 			enemyPath[this.enemyNumber][this.pathDes].x, 
@@ -207,7 +207,7 @@ function Enemy(EnemyNumber){
 		this.pathDes+=1;
 		if(this.pathDes >= enemyPath[this.enemyNumber].length){
 			this.hp = 0;
-			HP -= 10;
+			HP -= 100;
 		}else{
 			this.direction = getUnitVector(
 					this.x,
@@ -227,7 +227,7 @@ var enemies = [];
 
 var slimeImg = document.createElement("img");
 slimeImg.src = "images/slime.gif";
-var HP = 100;
+var HP = 5000;
 function draw(){
 	// 將背景圖片畫在 canvas 上的 (0,0) 位置
 	ctx.drawImage(bgImg,0,0);
@@ -291,6 +291,13 @@ function draw(){
 		var newEnemy2 = new Enemy(1);
 		enemies.push(newEnemy);
 		enemies.push(newEnemy2);
+
+		if(enemyHP <= 500){
+			enemyHP += 10;
+		}
+		if(clock % 1000 && FPS > 20){
+			FPS -= 1;
+		}
 	}
 	clock++;
 
@@ -309,7 +316,7 @@ $( "#game-canvas" ).click( function( event ) {
 			isBuilding = true;
 		}
 	}else if(isBuilding == true){
-		isBuilding = false;
+
 		newTower = new tower(towerPos.x,towerPos.y);
 		towers.push(newTower);
 	}
