@@ -34,6 +34,7 @@ var FPS = 60;
 var imgPieceSize = 32;
 var cursor = {x:0, y:0}; 
 var isBuilding = false;
+var towerPrice = 150;
 towerPos={x:0,y:0};
 
 var cannonballImage = document.createElement("img");
@@ -234,6 +235,7 @@ var slimeImg = document.createElement("img");
 slimeImg.src = "images/slime.gif";
 var HP = 5000;
 var level = 1;
+var money = 500;
 function draw(){
 	// 將背景圖片畫在 canvas 上的 (0,0) 位置
 	ctx.drawImage(bgImg,0,0);
@@ -255,6 +257,7 @@ function draw(){
 	for(var i = 0; i<enemies.length ; i++){
 		if(enemies[i].hp <= 0){
 			enemies.splice(i,1);
+			money += 15;
 			point += 10;
 			i-=1;
 		}else{
@@ -287,9 +290,10 @@ function draw(){
 
 	ctx.font = "24px Arial";
 	ctx.fillStyle = "white";
-	ctx.fillText( "HP:" + HP, 0 , 20 );
-	ctx.fillText( "分數:" + point, 0 , 50 );
-	ctx.fillText( "Level:" + level, 0 , 80 );
+	ctx.fillText( "HP:" + HP, 0 , 25 );
+	ctx.fillText( "分數:" + point, 0 , 55 );
+	ctx.fillText( "Level:" + level, 0 , 85 );
+	ctx.fillText( "Money:" + money, 500 , 25 );
 
 	if( HP == 0){
 		clearInterval(intervalID);
@@ -327,10 +331,12 @@ $( "#game-canvas" ).click( function( event ) {
 			isBuilding = true;
 		}
 	}else if(isBuilding == true){
-
-		newTower = new tower(towerPos.x,towerPos.y);
-		towers.push(newTower);
-		isBuilding = false;
+		if(money >= towerPrice){
+			money -= towerPrice;
+			newTower = new tower(towerPos.x,towerPos.y);
+			towers.push(newTower);
+			isBuilding = false;
+		}
 	}
 });
 
