@@ -1,23 +1,23 @@
 // 創造 img HTML 元素，並放入變數中
 var bgImg = document.createElement("img");
 // 設定這個元素的要顯示的圖片
-bgImg.src = "images/map2.png";
+bgImg.src = "../images/map2.png";
 
 
 // 創造 img HTML 元素，並放入變數中
 var heroImg = document.createElement("img");
 // 設定這個元素的要顯示的圖片
-heroImg.src = "images/jason.gif";
+heroImg.src = "../images/jason.gif";
 
 // 創造 img HTML 元素，並放入變數中
 var towerBtn = document.createElement("img");
 // 設定這個元素的要顯示的圖片
-towerBtn.src = "images/tower-btn.png";
+towerBtn.src = "../images/tower-btn.png";
 
 // 創造 img HTML 元素，並放入變數中
 var towerImg = document.createElement("img");
 // 設定這個元素的要顯示的圖片
-towerImg.src = "images/tower.png";
+towerImg.src = "../images/tower.png";
 
 // 找出網頁中的 canvas 元素
 var canvas = document.getElementById("game-canvas");
@@ -31,7 +31,7 @@ var hero = {
 
 var FPS = 60;
 
-
+var imgPieceSize = 32;
 var cursor = {x:0, y:0}; 
 var isBuilding = false;
 towerPos={x:0,y:0};
@@ -53,7 +53,7 @@ function getUnitVector (srcX, srcY, targetX, targetY) {
 
 function Cannonball(tower){
 	this.speed = 320;
-	this.damage = 5 ;
+	this.damage = 50 ;
 	this.hitted = false;
 
 	var aimedEnemy = enemies[tower.aimingEnemyId];
@@ -69,11 +69,15 @@ function Cannonball(tower){
 				enemies[i].x, 
 				enemies[i].y, 
 				this.x, this.y, 
-				32,32
+				imgPieceSize,imgPieceSize
 			)){
 				this.hitted = true;
 				enemies[i].hp -= this.damage;
 				break;
+			}
+
+			if(this.x <= 0 || this.x >= 640 || this.y<0 || this.y > 480){
+				this.hitted = true;
 			}
 		}
 	} 
@@ -110,12 +114,13 @@ function isCollided ( pointX, pointY, targetX, targetY, targetWidth, targetHeigh
 	}
 }
 
+var towerAttackDis = 96;
 function tower(towerX,towerY){
 	this.x = towerX;
 	this.y = towerY;
 	this.fireRate = 2;
-	this.readyToShootTime = 1; // 還有幾秒就發射
-	this.range = 96;
+	this.readyToShootTime = 0.5; // 還有幾秒就發射
+	this.range = towerAttackDis;
 	this.aimingEnemyId = null;
 	
 	this.shoot = function(){
@@ -145,29 +150,29 @@ function tower(towerX,towerY){
 
 var towers = [];
 var enemyPath = [[
-	{x:2 * 32,y:13 * 32},
-	{x:2 * 32,y:9 * 32},
-	{x:4 * 32,y:9 * 32},
-	{x:4 * 32,y:12 * 32},
-	{x:10 * 32,y:12 * 32},
-	{x:10 * 32,y:13 * 32},
-	{x:18 * 32,y:13 * 32},
-	{x:18 * 32,y:9 * 32},
-	{x:15 * 32,y:9 * 32},
-	{x:15 * 32,y:10 * 32},
-	{x:7 * 32,y:10 * 32},
-	{x:7 * 32,y:7 * 32},
-	{x:0 * 32,y:7 * 32}
+	{x:2 * imgPieceSize,y:13 * imgPieceSize},
+	{x:2 * imgPieceSize,y:9 * imgPieceSize},
+	{x:4 * imgPieceSize,y:9 * imgPieceSize},
+	{x:4 * imgPieceSize,y:12 * imgPieceSize},
+	{x:10 * imgPieceSize,y:12 * imgPieceSize},
+	{x:10 * imgPieceSize,y:13 * imgPieceSize},
+	{x:18 * imgPieceSize,y:13 * imgPieceSize},
+	{x:18 * imgPieceSize,y:9 * imgPieceSize},
+	{x:15 * imgPieceSize,y:9 * imgPieceSize},
+	{x:15 * imgPieceSize,y:10 * imgPieceSize},
+	{x:7 * imgPieceSize,y:10 * imgPieceSize},
+	{x:7 * imgPieceSize,y:7 * imgPieceSize},
+	{x:0 * imgPieceSize,y:7 * imgPieceSize}
 ],[
-	{x:12 * 32,y:1 * 32},
-	{x:12 * 32,y:4 * 32},
-	{x:17 * 32,y:4 * 32},
-	{x:17 * 32,y:7 * 32},
-	{x:10 * 32,y:7 * 32},
-	{x:10 * 32,y:2 * 32},
-	{x:2 * 32,y:2 * 32},
-	{x:2 * 32,y:6 * 32},
-	{x:0 * 32,y:6 * 32},
+	{x:12 * imgPieceSize,y:1 * imgPieceSize},
+	{x:12 * imgPieceSize,y:4 * imgPieceSize},
+	{x:17 * imgPieceSize,y:4 * imgPieceSize},
+	{x:17 * imgPieceSize,y:7 * imgPieceSize},
+	{x:10 * imgPieceSize,y:7 * imgPieceSize},
+	{x:10 * imgPieceSize,y:2 * imgPieceSize},
+	{x:2 * imgPieceSize,y:2 * imgPieceSize},
+	{x:2 * imgPieceSize,y:6 * imgPieceSize},
+	{x:0 * imgPieceSize,y:6 * imgPieceSize},
 ]];
 
 enemyHP = 10;
@@ -175,11 +180,11 @@ function Enemy(EnemyNumber){
 	this.enemyNumber = EnemyNumber;
 	if(EnemyNumber == 0){
 		this.x = 0; 
-		this.y = (15-2)* 32;
+		this.y = (15-2)* imgPieceSize;
 		this.direction = {x : 1,y : 0};
 	}else{
-		this.x = 20 * 32; 
-		this.y = 1 * 32;
+		this.x = 20 * imgPieceSize; 
+		this.y = 1 * imgPieceSize;
 		this.direction = {x : -1,y : 0};
 	}
 	this.speed = 64;
@@ -228,6 +233,7 @@ var enemies = [];
 var slimeImg = document.createElement("img");
 slimeImg.src = "images/slime.gif";
 var HP = 5000;
+var level = 1;
 function draw(){
 	// 將背景圖片畫在 canvas 上的 (0,0) 位置
 	ctx.drawImage(bgImg,0,0);
@@ -236,8 +242,12 @@ function draw(){
 
 
 	if(isBuilding == true){
-		towerPos.x = cursor.x - cursor.x % 32;
-		towerPos.y = cursor.y - cursor.y % 32;
+		towerPos.x = cursor.x - cursor.x % imgPieceSize;
+		towerPos.y = cursor.y - cursor.y % imgPieceSize;
+		ctx.beginPath();
+		ctx.arc(towerPos.x + imgPieceSize/2 , towerPos.y + imgPieceSize/2, towerAttackDis, 0, 2*Math.PI, true);
+		ctx.fillStyle = "rgba(0,0,0,0.5)";
+		ctx.fill();
 		ctx.drawImage(towerImg, towerPos.x, towerPos.y);
 	}
 
@@ -279,6 +289,7 @@ function draw(){
 	ctx.fillStyle = "white";
 	ctx.fillText( "HP:" + HP, 0 , 20 );
 	ctx.fillText( "分數:" + point, 0 , 50 );
+	ctx.fillText( "Level:" + level, 0 , 80 );
 
 	if( HP == 0){
 		clearInterval(intervalID);
@@ -286,16 +297,16 @@ function draw(){
 		ctx.fillStyle = "RED";
 		ctx.fillText( "U Lose", 150 , 300 );
 	}
-	if(clock % 80 == 0){
+	if(clock!= 0 &&　clock % 80 == 0){
 		var newEnemy = new Enemy(0);
 		var newEnemy2 = new Enemy(1);
 		enemies.push(newEnemy);
 		enemies.push(newEnemy2);
-
-		if(enemyHP <= 500){
+		if(clock % (80*20) == 0 && enemyHP <= 500){
 			enemyHP += 10;
+			level += 1;
 		}
-		if(clock % 1000 && FPS > 20){
+		if(clock % (80*10) == 0 && FPS > 20){
 			FPS -= 1;
 		}
 	}
@@ -319,6 +330,7 @@ $( "#game-canvas" ).click( function( event ) {
 
 		newTower = new tower(towerPos.x,towerPos.y);
 		towers.push(newTower);
+		isBuilding = false;
 	}
 });
 
